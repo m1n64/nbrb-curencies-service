@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 services:
   backend:
@@ -6,16 +6,20 @@ services:
       context: ./backend/
       dockerfile: Dockerfile
       target: dev
-    container_name: backend
+    container_name: currencies-backend
     volumes:
       - ./backend/:/app:cached
     command: air
     ports:
       - "4000:4000"
+    networks:
+      - nbrb-currencies-network
 
   adminer:
     image: adminer
-    container_name: adminer
+    container_name: currencies-adminer
     restart: always
     ports:
       - "1000:8080"
+    networks:
+      - nbrb-currencies-network

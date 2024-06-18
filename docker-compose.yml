@@ -1,42 +1,24 @@
-version: '3'
+version: '3.8'
 
 services:
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: currencies-nginx
     ports:
       - "80:80"
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
-
-  db:
-    image: postgres:latest
-    container_name: db
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - ./db:/var/lib/postgresql/data
-
-  redis:
-    container_name: redis
-    hostname: redis
-    image: redis:latest
-    volumes:
-      - ./redis:/data
-    restart: always
+    networks:
+      - nbrb-currencies-network
 
   backend:
     build:
       context: ./backend/
       dockerfile: Dockerfile
       target: prod
-    container_name: backend
+    container_name: currencies-backend
     volumes:
       - ./backend/:/app:cached
     depends_on:
@@ -45,28 +27,49 @@ services:
     environment:
       REDIS_ADDRESS: redis:6379
       DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER}
-      DB_PASS: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER}
+      DB_PASS: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DB}
       GIN_MODE: "release"
     restart: always
+    networks:
+      - nbrb-currencies-network
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    restart: always
+  db:
+    image: mysql:latest
+    container_name: currencies-db
     ports:
-      - "1337:3000"
+      - "3306:3306"
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - ./grafana:/var/lib/grafana
+      - ./db:/var/lib/mysql
+    networks:
+      - nbrb-currencies-network
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    restart: always
+  redis:
+    container_name: currencies-redis
+    hostname: redis
+    image: redis:latest
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./redis:/data
+    restart: always
+    networks:
+      - nbrb-currencies-network
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: currencies-swagger-ui
+    environment:
+      API_URL: http://localhost/api/swagger/docs.json
+    ports:
+      - "8888:8080"
+    networks:
+      - nbrb-currencies-network
+
+networks:
+  nbrb-currencies-network:
+    driver: bridge

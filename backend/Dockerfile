@@ -1,5 +1,5 @@
 # Определяем базовый образ для сборки
-ARG GO_VERSION=1.21
+ARG GO_VERSION=1.22
 
 # Стадия сборки для разработки
 FROM golang:${GO_VERSION}-alpine as dev
@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 go build -gcflags "all=-N -l" -o main .
 EXPOSE 9999 4000
 
 # Установка Air для hot reload
-RUN CGO_ENABLED=0 go install github.com/cosmtrek/air@latest
+RUN CGO_ENABLED=0 go install github.com/air-verse/air@latest
 
 # Обновление PATH для включения директории с Air
 ENV PATH $PATH:/go/bin
