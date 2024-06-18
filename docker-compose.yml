@@ -64,7 +64,7 @@ services:
     image: swaggerapi/swagger-ui
     container_name: currencies-swagger-ui
     environment:
-      API_URL: http://localhost/api/swagger/docs.json
+      API_URL: ${SWAGGER_DOCS_URL}
     ports:
       - "8888:8080"
     networks:
