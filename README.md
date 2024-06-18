@@ -3,7 +3,7 @@
 ****
 Backend: Go 1.22, Gin-gonic, GORM, air and delve
 
-Database: Postgresql, Redis
+Database: MySQL, Redis
 
 Server, proxy: nginx
 
