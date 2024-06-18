@@ -8,6 +8,9 @@ Database: MySQL, Redis
 Server, proxy: nginx
 
 *****
+```shell
+cp .env.example .env
+```
 
 Dev-mode:
 ```shell
